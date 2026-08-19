@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Arquivo SCP - Banco de Anomalias</title>
+
+  <style>
+    :root {
+      --fundo: #090a0c;
+      --painel: #12151a;
+      --painel-claro: #1a1e24;
+      --texto: #e6e6e6;
+      --texto-fraco: #9da3ae;
+      --borda: #2c323b;
+      --vermelho: #a71919;
+      --safe: #35b96f;
+      --keter: #e34949;
+      --thaumiel: #9c65e8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--texto);
+      background:
+        radial-gradient(circle at top, #20252d 0, transparent 35%),
+        var(--fundo);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 20px 5%;
+      border-bottom: 1px solid var(--borda);
+      background: rgba(9, 10, 12, 0.94);
+      backdrop-filter: blur(12px);
+    }
+
+    .cabecalho {
+      width: min(1200px, 100%);
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .marca {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .simbolo {
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--vermelho);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 900;
+      box-shadow: 0 0 22px rgba(167, 25, 25, 0.35);
+    }
+
+    .marca h1 {
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .marca p {
+      margin-top: 5px;
+      color: var(--texto-fraco);
+      font-size: 0.88rem;
+    }
+
+    .status {
+      color: #84daa8;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    main {
+      width: min(1200px, 90%);
+      margin: 38px auto 80px;
+    }
+
+    .aviso {
+      margin-bottom: 28px;
+      padding: 18px;
+      border-left: 4px solid var(--vermelho);
+      border-radius: 8px;
+      color: #d9d9d9;
+      background: rgba(167, 25, 25, 0.09);
+      line-height: 1.6;
+    }
+
+    .aviso strong {
+      color: #ff7373;
+    }
+
+    .controles {
+      display: grid;
+      grid-template-columns: minmax(230px, 1fr) 220px;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .controles input,
+    .controles select {
+      width: 100%;
+      padding: 14px 15px;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      outline: none;
+      color: var(--texto);
+      background: var(--painel);
+    }
+
+    .controles input:focus,
+    .controles select:focus {
+      border-color: #707987;
+      box-shadow: 0 0 0 3px rgba(112, 121, 135, 0.12);
+    }
+
+    .resumo {
+      margin-bottom: 22px;
+      color: var(--texto-fraco);
+    }
+
+    .grade {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+      gap: 18px;
+    }
+
+    .cartao {
+      position: relative;
+      overflow: hidden;
+      min-height: 260px;
+      padding: 21px;
+      border: 1px solid var(--borda);
+      border-radius: 12px;
+      background: linear-gradient(145deg, var(--painel-claro), var(--painel));
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+
+    .cartao::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      content: "";
+      background: var(--classe-cor);
+    }
+
+    .cartao:hover {
+      transform: translateY(-5px);
+      border-color: var(--classe-cor);
+    }
+
+    .topo-cartao {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .codigo {
+      color: #fff;
+      font-size: 1.15rem;
+      letter-spacing: 1px;
+    }
+
+    .classe {
+      flex-shrink: 0;
+      padding: 6px 9px;
+      border: 1px solid var(--classe-cor);
+      border-radius: 999px;
+      color: var(--classe-cor);
+      background: color-mix(in srgb, var(--classe-cor) 12%, transparent);
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cartao h3 {
+      margin: 20px 0 11px;
+      color: #f1f1f1;
+      font-size: 1.18rem;
+    }
+
+    .descricao {
+      min-height: 76px;
+      color: #b9bec7;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 17px;
+      padding-top: 15px;
+      border-top: 1px solid var(--borda);
+      color: var(--texto-fraco);
+      font-size: 0.78rem;
+    }
+
+    .detalhes {
+      width: 100%;
+      margin-top: 17px;
+      padding: 10px;
+      border: 1px solid var(--borda);
+      border-radius: 7px;
+      color: #ddd;
+      background: #0d0f12;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .detalhes:hover {
+      border-color: var(--classe-cor);
+      background: #16191e;
+    }
+
+    .safe {
+      --classe-cor: var(--safe);
+    }
+
+    .keter {
+      --classe-cor: var(--keter);
+    }
+
+    .thaumiel {
+      --classe-cor: var(--thaumiel);
+    }
+
+    .vazio {
+      grid-column: 1 / -1;
+      padding: 55px;
+      border: 1px dashed var(--borda);
+      border-radius: 10px;
+      color: var(--texto-fraco);
+      text-align: center;
+    }
+
+    footer {
+      padding: 30px 5%;
+      border-top: 1px solid var(--borda);
+      color: #7f8590;
+      text-align: center;
+      font-size: 0.83rem;
+    }
+
+    .modal-fundo {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.82);
+    }
+
+    .modal-fundo.aberto {
+      display: grid;
+    }
+
+    .modal {
+      width: min(650px, 100%);
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 28px;
+      border: 1px solid var(--borda);
+      border-top: 4px solid var(--modal-cor);
+      border-radius: 12px;
+      background: #12151a;
+      box-shadow: 0 20px 70px #000;
+    }
+
+    .modal-topo {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .modal h2 {
+      color: #fff;
+    }
+
+    .modal .subtitulo {
+      margin-top: 7px;
+      color: var(--modal-cor);
+      font-weight: 700;
+    }
+
+    .modal p {
+      margin-top: 22px;
+      color: #c2c6cd;
+      line-height: 1.7;
+    }
+
+    .fechar {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      border: 1px solid var(--borda);
+      border-radius: 50%;
+      color: #fff;
+      background: #20242b;
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 700px) {
+      .cabecalho {
+        align-items: flex-start;
+      }
+
+      .status {
+        display: none;
+      }
+
+      .controles {
+        grid-template-columns: 1fr;
+      }
+
+      .grade {
+        grid-template-columns: 1fr;
+      }
+
+      .simbolo {
+        width: 50px;
+        height: 50px;
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="cabecalho">
+      <div class="marca">
+        <div class="simbolo">SCP</div>
+
+        <div>
+          <h1>Arquivo de Anomalias</h1>
+          <p>Secure, Contain, Protect</p>
+        </div>
+      </div>
+
+      <div class="status">● Sistema operacional</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="aviso">
+      <strong>AVISO DE SEGURANÇA:</strong>
+      este é um catálogo fictício inspirado no universo SCP. Os registros
+      abaixo foram criados apenas para demonstração e não representam artigos
+      oficiais da Fundação SCP.
+    </section>
+
+    <section class="controles" aria-label="Controles de pesquisa">
+      <input
+        id="pesquisa"
+        type="search"
+        placeholder="Pesquisar número, nome ou descrição..."
+        autocomplete="off"
+      >
+
+      <select id="filtroClasse" aria-label="Filtrar por classe">
+        <option value="todas">Todas as classes</option>
+        <option value="Safe">Safe</option>
+        <option value="Keter">Keter</option>
+        <option value="Thaumiel">Thaumiel</option>
+      </select>
+    </section>
+
+    <p id="resumo" class="resumo">Exibindo 60 registros classificados.</p>
+
+    <section id="grade" class="grade" aria-live="polite"></section>
+  </main>
+
+  <footer>
+    Conteúdo fictício inspirado no universo SCP. Fundação SCP e conceitos
+    relacionados pertencem aos seus respectivos autores.
+  </footer>
+
+  <div id="modalFundo" class="modal-fundo" role="dialog" aria-modal="true">
+    <article id="modal" class="modal">
+      <div class="modal-topo">
+        <div>
+          <h2 id="modalCodigo"></h2>
+          <div id="modalTitulo" class="subtitulo"></div>
+        </div>
+
+        <button id="fecharModal" class="fechar" aria-label="Fechar">×</button>
+      </div>
+
+      <p id="modalTexto"></p>
+    </article>
+  </div>
+
+  <script>
+    const nomesSafe = [
+      "A Lâmpada que Sussurra",
+      "O Relógio de Chuva",
+      "A Caixa de Música Solar",
+      "O Espelho Tímido",
+      "A Caneta de Memórias",
+      "O Guarda-Chuva Interior",
+      "A Xícara Inesgotável",
+      "O Livro das Marés",
+      "A Pedra que Boceja",
+      "O Jardim de Bolso",
+      "A Câmera do Amanhã",
+      "O Gato de Papel",
+      "A Janela Submersa",
+      "O Sino das Cores",
+      "A Chave de Algodão",
+      "O Rádio das Estrelas",
+      "A Máscara Sonolenta",
+      "O Mapa Impossível",
+      "A Vela Congelada",
+      "O Peixe de Vidro"
+    ];
+
+    const nomesKeter = [
+      "O Corredor Faminto",
+      "A Sombra Sem Dono",
+      "O Enxame de Ferrugem",
+      "A Voz Sob a Cidade",
+      "O Predador de Retratos",
+      "A Porta Carmesim",
+      "O Homem Sem Ontem",
+      "A Névoa dos Nomes",
+      "O Motor Orgânico",
+      "A Floresta Invertida",
+      "O Parasita de Sinais",
+      "A Criança do Eclipse",
+      "O Mar dentro da Parede",
+      "A Estátua Migratória",
+      "O Caçador de Ecos",
+      "A Tempestade Consciente",
+      "O Arquivo que Apaga",
+      "A Colmeia de Ossos",
+      "O Horizonte Vivo",
+      "A Boca da Montanha"
+    ];
+
+    const nomesThaumiel = [
+      "A Âncora da Realidade",
+      "O Cofre do Vazio",
+      "A Máquina de Contenção",
+      "O Oráculo Silencioso",
+      "A Rede Antimemética",
+      "O Farol Dimensional",
+      "A Sentinela de Bronze",
+      "O Jardim Nulificador",
+      "A Chave do Horizonte",
+      "O Coração de Granito",
+      "A Biblioteca Morta",
+      "O Guardião das Portas",
+      "A Torre de Cinzas",
+      "O Prisma Estabilizador",
+      "A Baleia Celeste",
+      "O Protocolo Zero",
+      "A Coroa sem Rei",
+      "O Labirinto Protetor",
+      "A Lua Artificial",
+      "O Último Interruptor"
+    ];
+
+    const descricoesSafe = [
+      "Objeto de comportamento previsível que produz efeitos anômalos somente quando ativado por contato humano.",
+      "Anomalia estável mantida em um armário padrão. Testes exigem autorização de pessoal de Nível 2.",
+      "Artefato capaz de alterar discretamente a percepção de tempo de pessoas próximas.",
+      "Entidade dócil que reage positivamente a música e apresenta baixo risco durante o manuseio.",
+      "Objeto doméstico que cria pequenas manifestações visuais sem causar danos permanentes."
+    ];
+
+    const descricoesKeter = [
+      "Entidade altamente hostil com histórico de múltiplas tentativas de ruptura de contenção.",
+      "Fenômeno agressivo capaz de se espalhar por estruturas, redes e equipamentos não isolados.",
+      "Anomalia imprevisível que modifica seu comportamento depois de cada protocolo aplicado.",
+      "Organismo predatório com capacidade de adaptação acelerada e resistência a métodos convencionais.",
+      "Evento espacial instável que exige monitoramento contínuo e equipes de resposta permanente."
+    ];
+
+    const descricoesThaumiel = [
+      "Anomalia utilizada pela Fundação para neutralizar ou conter entidades de risco extremo.",
+      "Dispositivo estratégico capaz de estabilizar distorções locais da realidade.",
+      "Entidade cooperativa empregada exclusivamente em protocolos de contenção de alta prioridade.",
+      "Estrutura anômala que impede a propagação de fenômenos extradimensionais.",
+      "Recurso sigiloso usado para localizar e enfraquecer ameaças que não respondem a meios convencionais."
+    ];
+
+    const cores = {
+      Safe: "#35b96f",
+      Keter: "#e34949",
+      Thaumiel: "#9c65e8"
+    };
+
+    function criarRegistros(nomes, classe, inicio, descricoes) {
+      return nomes.map((nome, indice) => {
+        const numero = inicio + indice;
+        const descricao = descricoes[indice % descricoes.length];
+
+        return {
+          codigo: `SCP-${String(numero).padStart(3, "0")}`,
+          nome,
+          classe,
+          nivel: classe === "Safe" ? 2 : classe === "Keter" ? 4 : 5,
+          descricao,
+          procedimento:
+            classe === "Safe"
+              ? "O item deve permanecer em um compartimento padrão monitorado por câmera. Testes devem ser registrados e acompanhados por pelo menos dois pesquisadores."
+              : classe === "Keter"
+              ? "A contenção deve ser monitorada continuamente por sensores redundantes. Qualquer alteração exige evacuação imediata e ativação da força-tarefa designada."
+              : "O acesso é restrito ao Conselho O5. O objeto deve ser ativado apenas durante eventos críticos e mediante autorização de dois membros do comando."
+        };
+      });
+    }
+
+    const registros = [
+      ...criarRegistros(nomesSafe, "Safe", 101, descricoesSafe),
+      ...criarRegistros(nomesKeter, "Keter", 301, descricoesKeter),
+      ...criarRegistros(nomesThaumiel, "Thaumiel", 501, descricoesThaumiel)
+    ];
+
+    const grade = document.getElementById("grade");
+    const pesquisa = document.getElementById("pesquisa");
+    const filtroClasse = document.getElementById("filtroClasse");
+    const resumo = document.getElementById("resumo");
+
+    const modalFundo = document.getElementById("modalFundo");
+    const modal = document.getElementById("modal");
+    const modalCodigo = document.getElementById("modalCodigo");
+    const modalTitulo = document.getElementById("modalTitulo");
+    const modalTexto = document.getElementById("modalTexto");
+    const fecharModal = document.getElementById("fecharModal");
+
+    function normalizar(texto) {
+      return texto
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function escaparHTML(texto) {
+      const div = document.createElement("div");
+      div.textContent = texto;
+      return div.innerHTML;
+    }
+
+    function renderizar() {
+      const termo = normalizar(pesquisa.value.trim());
+      const classeEscolhida = filtroClasse.value;
+
+      const filtrados = registros.filter((registro) => {
+        const texto = normalizar(
+          `${registro.codigo} ${registro.nome} ${registro.classe} ${registro.descricao}`
+        );
+
+        const correspondePesquisa = texto.includes(termo);
+        const correspondeClasse =
+          classeEscolhida === "todas" ||
+          registro.classe === classeEscolhida;
+
+        return correspondePesquisa && correspondeClasse;
+      });
+
+      resumo.textContent =
+        filtrados.length === 1
+          ? "Exibindo 1 registro classificado."
+          : `Exibindo ${filtrados.length} registros classificados.`;
+
+      if (filtrados.length === 0) {
+        grade.innerHTML = `
+          <div class="vazio">
+            Nenhum registro foi encontrado para os filtros selecionados.
+          </div>
+        `;
+        return;
+      }
+
+      grade.innerHTML = filtrados
+        .map((registro) => {
+          const classeCSS = registro.classe.toLowerCase();
+
+          return `
+            <article class="cartao ${classeCSS}">
+              <div class="topo-cartao">
+                <strong class="codigo">${escaparHTML(registro.codigo)}</strong>
+                <span class="classe">${escaparHTML(registro.classe)}</span>
+              </div>
+
+              <h3>${escaparHTML(registro.nome)}</h3>
+
+              <p class="descricao">
+                ${escaparHTML(registro.descricao)}
+              </p>
+
+              <div class="meta">
+                <span>Nível ${registro.nivel}</span>
+                <span>Condição: contido</span>
+              </div>
+
+              <button
+                class="detalhes"
+                data-codigo="${escaparHTML(registro.codigo)}"
+              >
+                Abrir arquivo
+              </button>
+            </article>
+          `;
+        })
+        .join("");
+    }
+
+    function abrirModal(codigo) {
+      const registro = registros.find((item) => item.codigo === codigo);
+
+      if (!registro) {
+        return;
+      }
+
+      modal.style.setProperty("--modal-cor", cores[registro.classe]);
+      modalCodigo.textContent = registro.codigo;
+      modalTitulo.textContent = `${registro.nome} - Classe ${registro.classe}`;
+      modalTexto.textContent =
+        `Descrição: ${registro.descricao} ` +
+        `Procedimentos especiais de contenção: ${registro.procedimento}`;
+
+      modalFundo.classList.add("aberto");
+      document.body.style.overflow = "hidden";
+      fecharModal.focus();
+    }
+
+    function fechar() {
+      modalFundo.classList.remove("aberto");
+      document.body.style.overflow = "";
+    }
+
+    pesquisa.addEventListener("input", renderizar);
+    filtroClasse.addEventListener("change", renderizar);
+
+    grade.addEventListener("click", (evento) => {
+      const botao = evento.target.closest("[data-codigo]");
+
+      if (botao) {
+        abrirModal(botao.dataset.codigo);
+      }
+    });
+
+    fecharModal.addEventListener("click", fechar);
+
+    modalFundo.addEventListener("click", (evento) => {
+      if (evento.target === modalFundo) {
+        fechar();
+      }
+    });
+
+    document.addEventListener("keydown", (evento) => {
+      if (evento.key === "Escape" && modalFundo.classList.contains("aberto")) {
+        fechar();
+      }
+    });
+
+    renderizar();
+  </script>
+</body>
+</html>
